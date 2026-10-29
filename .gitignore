@@ -1,0 +1,10 @@
+# L1: локальные черновики — в git не попадают
+.notes/
+
+# служебный мусор
+.tmp/
+
+# ОС
+Thumbs.db
+desktop.ini
+.DS_Store

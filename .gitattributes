@@ -1,0 +1,4 @@
+# Единые окончания строк: shell-хук обязан остаться LF,
+# иначе git под Windows сломает его при клоне.
+* text=auto eol=lf
+*.ps1 text eol=crlf
