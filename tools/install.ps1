@@ -94,9 +94,13 @@ if ($kept.Count -gt 0) {
 Write-Output "  $gitNote"
 Write-Output ''
 Write-Output 'Дальше:'
+$next = New-Object System.Collections.ArrayList
 if ($kept -contains 'AGENTS.md') {
-    Write-Output '  1. AGENTS.md уже был — вставь в него секцию протокола вручную (не перетирай чужие правила).'
+    [void]$next.Add('AGENTS.md уже был — вставь в него секцию протокола вручную, не перетирая чужие правила.')
 }
-Write-Output '  2. Заполни TASK.md: цель, следующие шаги, проверка.'
-Write-Output '  3. Прогони: powershell -File tools/memory-check.ps1'
-Write-Output '  4. Первый коммит: git add -A; git commit -m "AllToDSH init"'
+[void]$next.Add('Заполни TASK.md: дату, цель, следующие шаги, проверку.')
+[void]$next.Add('Прогони: powershell -File tools/memory-check.ps1')
+[void]$next.Add('Первый коммит: git add -A; git commit -m "AllToDSH init"')
+for ($i = 0; $i -lt $next.Count; $i++) {
+    Write-Output ("  {0}. {1}" -f ($i + 1), $next[$i])
+}
