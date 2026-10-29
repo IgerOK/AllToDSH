@@ -48,6 +48,12 @@ else {
     $lines = @(Get-Content -LiteralPath $full -Encoding UTF8)
     $lineCount = $lines.Count
 
+    # незаполненный шаблон — это не поломка: одно предупреждение вместо пяти
+    $isTemplate = (@($lines | Where-Object { $_ -match 'ГГГГ-ММ-ДД' }).Count -gt 0)
+    if ($isTemplate) {
+        Add-Result 'WARN' 'шаблон не заполнен: укажи дату, цель, следующие шаги и проверку'
+    }
+
     # --- шапка ---
     $head = @($lines | Select-Object -First 12)
     $protocolSeen = $false
@@ -60,7 +66,7 @@ else {
         if ($l -match 'Обновлено:\s*(\d{4}-\d{2}-\d{2})') { $updated = $Matches[1] }
     }
     if (-not $protocolSeen) { Add-Result 'WARN' 'в шапке нет строки Protocol: 1' }
-    if (-not $updated) { Add-Result 'FAIL' 'в шапке нет даты «Обновлено: ГГГГ-ММ-ДД»' }
+    if (-not $updated -and -not $isTemplate) { Add-Result 'FAIL' 'в шапке нет даты «Обновлено: ГГГГ-ММ-ДД»' }
 
     # --- активная задача ---
     $start = -1
@@ -89,25 +95,27 @@ else {
         }
         $section = if ($end -gt $start + 1) { @($lines[($start + 1)..($end - 1)]) } else { @() }
         $steps = @($section | Where-Object { $_ -match '^\s*\d+\.\s' })
-        if ($status -ne 'RESOLVED') {
+        if ($status -ne 'RESOLVED' -and -not $isTemplate) {
             if ($steps.Count -eq 0) { Add-Result 'FAIL' 'нет нумерованных следующих шагов' }
             elseif ($steps.Count -lt 2) { Add-Result 'WARN' "следующих шагов: $($steps.Count), нужно 2–3" }
         }
     }
 
     # --- файлы для чтения ---
-    for ($i = 0; $i -lt $lineCount; $i++) {
-        if ($lines[$i] -match 'Файлы для чтения') {
-            $parts = $lines[$i] -split '`'
-            for ($k = 1; $k -lt $parts.Count; $k += 2) {
-                $candidate = $parts[$k].Trim()
-                if (-not $candidate) { continue }
-                if ($candidate -notmatch '[\\/]|\.\w{1,5}$') { continue }
-                if (-not (Test-Path -LiteralPath (Join-Path $RepoRoot $candidate))) {
-                    Add-Result 'WARN' "в «Файлах для чтения» нет пути: $candidate"
+    if (-not $isTemplate) {
+        for ($i = 0; $i -lt $lineCount; $i++) {
+            if ($lines[$i] -match 'Файлы для чтения') {
+                $parts = $lines[$i] -split '`'
+                for ($k = 1; $k -lt $parts.Count; $k += 2) {
+                    $candidate = $parts[$k].Trim()
+                    if (-not $candidate) { continue }
+                    if ($candidate -notmatch '[\\/]|\.\w{1,5}$') { continue }
+                    if (-not (Test-Path -LiteralPath (Join-Path $RepoRoot $candidate))) {
+                        Add-Result 'WARN' "в «Файлах для чтения» нет пути: $candidate"
+                    }
                 }
+                break
             }
-            break
         }
     }
 
