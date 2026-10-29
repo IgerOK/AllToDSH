@@ -2,7 +2,7 @@
 
 Несколько текстовых файлов в проекте. После них новый чат подхватывает работу по слову «продолжаем» — без пересказа контекста, без «объясни заново, что мы делали».
 
-**Репозиторий:** <https://github.com/IgerOK/AllToDSH>
+**Автор:** [IgerOK](https://github.com/IgerOK) · **Репозиторий:** [github.com/IgerOK/AllToDSH](https://github.com/IgerOK/AllToDSH)
 
 ## Проблема
 
@@ -230,7 +230,7 @@ git config core.hooksPath .githooks
 
 ## Лицензия
 
-MIT. Копируйте, меняйте, встраивайте.
+MIT © 2026 IgerOK. Копируйте, меняйте, встраивайте.
 
 ---
 
